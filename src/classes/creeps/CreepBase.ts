@@ -1,4 +1,5 @@
 export class CreepBase {
+
     protected creep: Creep;
 
     constructor(creep: Creep) {
@@ -116,6 +117,10 @@ export class CreepBase {
         return null;
     }
 
+    public getAllConstructionSites(): ConstructionSite[] {
+        return this.creep.room.find(FIND_CONSTRUCTION_SITES);
+    }
+
     public getClosestConstructionSite(): ConstructionSite | null {
         return this.creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
     }
@@ -136,47 +141,5 @@ export class CreepBase {
             return this.creep.upgradeController(controller);
         }
         return null;
-    }
-
-    public run(): void {
-        const role = this.creep.memory.role;
-
-        if (this.isEmpty()) {
-            const source = this.getClosestSource();
-            if (source) {
-                this.harvestSource(source);
-            }
-        } else {
-            switch (role) {
-                case 'harvester': {
-                    this.transferEnergyToClosestStructure();
-                    break;
-                }
-                case 'builder': {
-                    const site = this.getClosestConstructionSite();
-                    if (site) {
-                        this.buildStructure(site);
-                    } else {
-                        this.upgradeController();
-                    }
-                    break;
-                }
-                case 'upgrader': {
-                    this.upgradeController();
-                    break;
-                }
-                default: {
-                    if (this.transferEnergyToClosestStructure() === null) {
-                        const site = this.getClosestConstructionSite();
-                        if (site) {
-                            this.buildStructure(site);
-                        } else {
-                            this.upgradeController();
-                        }
-                    }
-                    break;
-                }
-            }
-        }
     }
 }

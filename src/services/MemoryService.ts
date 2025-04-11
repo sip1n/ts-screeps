@@ -1,3 +1,5 @@
+import { CreepRole } from "../utils/enums";
+
 export class MemoryService {
     /**
      * Get a value from Memory by key
@@ -49,7 +51,7 @@ export class MemoryService {
      * Get all creeps with a specific role
      * @param role The role to filter by
      */
-    public static getCreepsByRole(role: string): Creep[] {
+    public static getCreepsByRole(role: CreepRole): Creep[] {
         return Object.values(Game.creeps).filter(creep =>
             creep.memory.role === role
         );
@@ -58,11 +60,11 @@ export class MemoryService {
     /**
      * Count creeps by role
      */
-    public static countCreepsByRole(): Record<string, number> {
-        const counts: Record<string, number> = {};
+    public static countCreepsByRole(): Record<CreepRole, number> {
+        const counts: Record<CreepRole, number> = {} as Record<CreepRole, number>;
 
         for (const name in Game.creeps) {
-            const role = Game.creeps[name].memory.role;
+            const role = Game.creeps[name].memory.role as CreepRole;
             counts[role] = (counts[role] || 0) + 1;
         }
 
@@ -74,7 +76,7 @@ export class MemoryService {
      * @param creepName The name of the creep
      * @param role The new role to assign
      */
-    public static setCreepRole(creepName: string, role: string): void {
+    public static setCreepRole(creepName: string, role: CreepRole): void {
         if (Game.creeps[creepName]) {
             Game.creeps[creepName].memory.role = role;
             console.log(`Reassigned ${creepName} to role: ${role}`);
@@ -101,7 +103,8 @@ export class MemoryService {
         console.log(`Total creeps: ${Object.values(Game.creeps).length}`);
 
         for (const role in creepCounts) {
-            console.log(`${role}: ${creepCounts[role]}`);
+            // Cast the role string to CreepRole enum to satisfy TypeScript
+            console.log(`${role}: ${creepCounts[role as CreepRole]}`);
         }
 
         console.log(`CPU Used: ${Game.cpu.getUsed().toFixed(2)}/${Game.cpu.limit}`);
