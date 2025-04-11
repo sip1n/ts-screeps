@@ -15,7 +15,6 @@ src/
 ├── utils/              # Utility functions and tools
 build/
 └── main.js             # Compiled JavaScript code
-dist/                   # Output directory for easier inspection of compiled code
 ```
 
 ## Installation
@@ -33,15 +32,10 @@ dist/                   # Output directory for easier inspection of compiled cod
 ## Usage
 
 1. The compiled code can be found in the `build/main.js` file.
-2. The `dist` folder is used to store the output in a more readable format for easier inspection. However, the `build` folder contains the bundled output created by Rollup, which is optimized for Screeps to understand the script.
+2. The `build` folder contains the bundled output created by Rollup, which is optimized for Screeps to understand the script.
 3. Upload the code to the Screeps server using the Screeps CLI or any preferred tool.
 
 ## Script Features
-
-- **CreepBase**: A base class defining common functionality for all creeps.
-- **HarvesterCreep**: A class managing creeps specialized in resource harvesting.
-- **Roles and Logic**: Each creep role has its own logic, located in the `roles/` folder.
-- **Utility Functions**: General-purpose tools and functions are located in the `utils/` folder.
 
 ## Development
 
