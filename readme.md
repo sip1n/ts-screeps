@@ -132,5 +132,3 @@ By following this roadmap, you can systematically build a fully automated and ef
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
-
-Contributions are welcome! Let's build better Screeps strategies together!
