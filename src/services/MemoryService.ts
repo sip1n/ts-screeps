@@ -173,4 +173,32 @@ export class MemoryService {
     public static getAllCreepCountTargets(): Record<CreepRole, number> {
         return this.get<Record<CreepRole, number>>(this.CREEP_COUNTS_PATH, this.createDefaultCreepCounts()) || this.createDefaultCreepCounts();
     }
+
+    /**
+     * Resets the entire Memory and forces reinitialization on the next tick
+     * Can be called from console with: `MemoryService.resetMemory()`
+     * @param confirm Set to true to confirm reset to prevent accidental calls
+     * @returns Message indicating success or requirement for confirmation
+     */
+    public static resetMemory(confirm: boolean = false): string {
+        if (!confirm) {
+            return "Please call with confirm=true to reset memory: MemoryService.resetMemory(true)";
+        }
+
+        // Save only some key parts like username for authentication
+        const savedParts: Partial<Memory> = {};
+
+        // Reset everything to defaults
+        for (const key in Memory) {
+            if (Object.prototype.hasOwnProperty.call(Memory, key)) {
+                delete Memory[key as keyof Memory];
+            }
+        }
+
+        // Force reinitialization
+        Memory._systemsInitialized = false;
+
+        console.log("Memory has been reset! Systems will be reinitialized on next tick.");
+        return "Memory reset complete. Systems will be reinitialized on next tick.";
+    }
 }

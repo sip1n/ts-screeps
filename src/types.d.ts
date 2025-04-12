@@ -3,6 +3,8 @@ interface CreepMemory {
     role: string;
     working?: boolean; // Optional boolean to track if the creep is currently working
     previousPos?: { x: number, y: number, roomName: string }; // Viimeisin sijainti heatmapia varten
+    idle?: boolean; // Whether the creep is in idle state (no tasks for its role available)
+    forceIdle?: boolean; // Force the creep to be idle, ignoring all role logic
 }
 
 // Memory-järjestelmämäärittelyt

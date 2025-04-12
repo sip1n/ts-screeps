@@ -42,7 +42,8 @@ export class SpawnerService {
             CreepRole.PAWN,
             CreepRole.HARVESTER,
             CreepRole.BUILDER,
-            CreepRole.UPGRADER
+            CreepRole.UPGRADER,
+            CreepRole.REPAIRMAN
         ];
 
         for (const role of rolesToCheck) {

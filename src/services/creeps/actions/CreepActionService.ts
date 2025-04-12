@@ -58,6 +58,16 @@ export class CreepActionService {
     }
 
     /**
+     * Korjaa rakenteita, prioriteettijärjestyksessä
+     * @param creep Creep, joka korjaa rakenteita
+     * @param minHitsPercent Paljonko prosenttia rakenteen max HP:stä pitää olla jäljellä jotta sitä ei tarvitse korjata (oletus 0.75 = 75%)
+     * @returns true jos korjaus onnistui, false jos ei löytynyt korjattavaa
+     */
+    public static repairStructures(creep: CreepBase, minHitsPercent: number = 0.75): boolean {
+        return creep.repairClosestStructure(minHitsPercent);
+    }
+
+    /**
      * Laskee paljonko energiaa rakenteen valmiiksi saattamiseen vielä tarvitaan
      */
     private static getStructureRemainingEnergy(site: ConstructionSite): number {
@@ -78,15 +88,23 @@ export class CreepActionService {
      * Suorittaa harvester-toiminnot: täyttää energia-rakenteita
      */
     public static runHarvesterActions(creep: CreepBase): void {
-        this.transferEnergyToStructures(creep);
+        if (!this.transferEnergyToStructures(creep)) {
+            // Jos ei ole energiavarastoja täytettävänä, asetutaan idle-tilaan
+            creep.setIdleState(true);
+        } else {
+            creep.setIdleState(false);
+        }
     }
 
     /**
      * Suorittaa builder-toiminnot: rakentaa rakenteita, muuten päivittää controlleria
      */
     public static runBuilderActions(creep: CreepBase): void {
-        if (!this.buildStructures(creep)) {
-            this.upgradeController(creep);
+        if (this.buildStructures(creep)) {
+            creep.setIdleState(false);
+        } else {
+            // Jos ei ole rakennuskohteita, asetutaan idle-tilaan
+            creep.setIdleState(true);
         }
     }
 
@@ -94,7 +112,24 @@ export class CreepActionService {
      * Suorittaa upgrader-toiminnot: päivittää controlleria
      */
     public static runUpgraderActions(creep: CreepBase): void {
-        this.upgradeController(creep);
+        if (this.upgradeController(creep)) {
+            creep.setIdleState(false);
+        } else {
+            // Jos ei ole controlleria päivitettävänä, asetutaan idle-tilaan (epätodennäköistä)
+            creep.setIdleState(true);
+        }
+    }
+
+    /**
+     * Suorittaa repairman-toiminnot: korjaa rakenteita, muuten tukee muita tehtäviä
+     */
+    public static runRepairmanActions(creep: CreepBase): void {
+        if (this.repairStructures(creep)) {
+            creep.setIdleState(false);
+        } else {
+            // Jos ei ole korjattavaa, asetutaan idle-tilaan
+            creep.setIdleState(true);
+        }
     }
 
     /**
@@ -104,11 +139,46 @@ export class CreepActionService {
      * 3. Päivittää controlleria
      */
     public static runPawnActions(creep: CreepBase): void {
-        if (!this.transferEnergyToStructures(creep)) {
-            // Huom: Pawn rakentaa vain yksinkertaisia rakenteita
-            if (!this.buildSimpleStructures(creep)) {
-                this.upgradeController(creep);
-            }
+        if (this.transferEnergyToStructures(creep)) {
+            creep.setIdleState(false);
+        } else if (this.buildSimpleStructures(creep)) {
+            creep.setIdleState(false);
+        } else if (this.upgradeController(creep)) {
+            creep.setIdleState(false);
+        } else {
+            // Jos mitään tehtävää ei löydy, asetutaan idle-tilaan
+            creep.setIdleState(true);
         }
+    }
+
+    /**
+     * Suorittaa dynaamiset tehtävät idle-tilassa oleville creepeille
+     * @param creep Idle-tilassa oleva creep
+     * @returns true jos jotain tehtävää löytyi ja suoritettiin, false jos ei mitään tehtävää saatavilla
+     */
+    public static runDynamicIdleTasks(creep: CreepBase): boolean {
+        // Prioriteettijärjestyksessä:
+        // 1. Energia varastoihin (tärkeintä)
+        if (this.transferEnergyToStructures(creep)) {
+            return true;
+        }
+
+        // 2. Korjaa rakenteita jotka ovat huonossa kunnossa (alle 50%)
+        if (this.repairStructures(creep, 0.5)) {
+            return true;
+        }
+
+        // 3. Rakenna rakenteita
+        if (this.buildStructures(creep)) {
+            return true;
+        }
+
+        // 4. Päivitä controlleria (viimeinen prioriteetti)
+        if (this.upgradeController(creep)) {
+            return true;
+        }
+
+        // Ei löytynyt mitään tehtävää
+        return false;
     }
 }

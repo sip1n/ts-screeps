@@ -37,6 +37,22 @@ build/
 
 ## Script Features
 
+### Memory Reset Feature
+
+Järjestelmässä on toiminto, jolla voit tyhjentää koko muistin ja pakottaa muistinalustuksen, kun haluat "clean slate" -tilanteen päivittäessäsi koodia.
+
+#### Konsolikomento muistin resetointiin:
+
+```javascript
+// Vaatii vahvistuksen vahingossa tapahtuvien resetointien estämiseksi
+MemoryService.resetMemory(true);
+```
+
+Tämä komento:
+- Tyhjentää kaikki avaimet Memory-objektista
+- Asettaa Memory._systemsInitialized = false, jotta järjestelmän alustuslogiikka ajetaan uudelleen
+- Aloittaa puhtaalta pöydältä kaikilla oletusasetuksilla
+
 ### Path Tracking & Heatmap System
 
 Path tracking järjestelmä seuraa creepien liikkeitä ja luo automaattisesti teitä (roads) paikkoihin, joissa creepejä liikkuu paljon. Järjestelmä:

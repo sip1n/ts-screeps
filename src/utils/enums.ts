@@ -3,6 +3,7 @@ export enum CreepRole {
     HARVESTER = 'harvester',
     BUILDER = 'builder',
     UPGRADER = 'upgrader',
+    REPAIRMAN = 'repairman',
     // ATTACKER = 'attacker',
     // DEFENDER = 'defender',
     // HEALER = 'healer',

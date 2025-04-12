@@ -83,6 +83,15 @@ export class CreepDefinitions {
             defaultCount: 2
         });
 
+        // REPAIRMAN - Rakenteiden korjaaja
+        this.definitions.set(CreepRole.REPAIRMAN, {
+            role: CreepRole.REPAIRMAN,
+            description: "Yleismies jantunen, joka korjaa rakenteita ja ylläpitää koloniaa",
+            minimumBody: [WORK, CARRY, CARRY, MOVE, MOVE],
+            baseBody: [WORK, CARRY, CARRY, MOVE, MOVE],
+            defaultCount: 1
+        });
+
         // lisää muita rooleja tarvittaessa
     }
 

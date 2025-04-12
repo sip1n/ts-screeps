@@ -195,4 +195,82 @@ export class CreepBase {
         }
         return null;
     }
+
+    /**
+     * Hakee huoneen kaikki korjausta tarvitsevat rakenteet
+     * @param minHitsPercent Paljonko prosenttia rakenteen max HP:stä pitää olla jäljellä jotta sitä ei tarvitse korjata (oletus 0.75 = 75%)
+     * @returns Lista rakenteista, jotka tarvitsevat korjausta
+     */
+    public getStructuresToRepair(minHitsPercent: number = 0.75): Structure[] {
+        return this.creep.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                // Walls and ramparts are handled separately because they have so much HP
+                if (structure.structureType === STRUCTURE_WALL || structure.structureType === STRUCTURE_RAMPART) {
+                    return structure.hits < 10000; // Cap at 10k hits for walls/ramparts initially
+                }
+
+                return structure.hits < structure.hitsMax * minHitsPercent;
+            }
+        });
+    }
+
+    /**
+     * Hakee lähimmän korjausta tarvitsevan rakenteen
+     * @param minHitsPercent Paljonko prosenttia rakenteen max HP:stä pitää olla jäljellä jotta sitä ei tarvitse korjata (oletus 0.75 = 75%)
+     * @returns Lähin korjausta tarvitseva rakenne tai null jos ei löydy
+     */
+    public getClosestStructureToRepair(minHitsPercent: number = 0.75): Structure | null {
+        const structures = this.getStructuresToRepair(minHitsPercent);
+        if (structures.length === 0) return null;
+
+        return this.creep.pos.findClosestByPath(structures);
+    }
+
+    /**
+     * Korjaa määritetyn rakenteen
+     * @param structure Rakenne, joka korjataan
+     * @returns Korjausoperaation tulos (ScreepsReturnCode)
+     */
+    public repairStructure(structure: Structure): number {
+        if (this.creep.repair(structure) === ERR_NOT_IN_RANGE) {
+            this.creep.moveTo(structure);
+        }
+        return this.creep.repair(structure);
+    }
+
+    /**
+     * Hakee ja korjaa lähimmän korjausta tarvitsevan rakenteen
+     * @param minHitsPercent Paljonko prosenttia rakenteen max HP:stä pitää olla jäljellä jotta sitä ei tarvitse korjata (oletus 0.75 = 75%)
+     * @returns true jos korjattavaa löytyi, false jos ei
+     */
+    public repairClosestStructure(minHitsPercent: number = 0.75): boolean {
+        const structure = this.getClosestStructureToRepair(minHitsPercent);
+        if (structure) {
+            this.repairStructure(structure);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Tarkistaa ja asettaa creepin idle-tilan
+     * @param isIdle Asetetaanko idle-tilaan
+     */
+    public setIdleState(isIdle: boolean): void {
+        this.creep.memory.idle = isIdle;
+    }
+
+    /**
+     * Tarkistaa onko creep idle-tilassa
+     */
+    public isIdle(): boolean {
+        return Boolean(this.creep.memory.idle);
+    }
+
+    /**
+     * Tarkistaa onko creep pakotetussa idle-tilassa
+     */
+    public isForceIdle(): boolean {
+        return Boolean(this.creep.memory.forceIdle);
+    }
 }

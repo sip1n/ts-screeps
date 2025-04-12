@@ -23,9 +23,25 @@ export class CreepService {
 
         const role = creep['creep'].memory.role;
 
+        // Jos creep on pakotettu idle-tilaan, ohitetaan kaikki logiikka
+        if (creep.isForceIdle()) {
+            return;
+        }
+
         // Jos creep ei ole työskentelytilassa, kerätään energiaa
         if (!creep.isWorking()) {
             creep.harvestEnergy();
+            return;
+        }
+
+        // Jos creep on idle-tilassa, yritetään suorittaa dynaamisia tehtäviä
+        if (creep.isIdle()) {
+            // Jos dynaamisia tehtäviä ei löydy, käytetään oletus roolia (pawn)
+            if (!CreepActionService.runDynamicIdleTasks(creep)) {
+                console.log(`Creep ${creep.getName()} is idle and has no dynamic tasks available.`);
+            } else {
+                console.log(`Creep ${creep.getName()} is performing dynamic tasks while idle.`);
+            }
             return;
         }
 
@@ -42,6 +58,9 @@ export class CreepService {
                 break;
             case CreepRole.UPGRADER:
                 CreepActionService.runUpgraderActions(creep);
+                break;
+            case CreepRole.REPAIRMAN:
+                CreepActionService.runRepairmanActions(creep);
                 break;
             default:
                 CreepActionService.runPawnActions(creep); // Oletustoiminta
