@@ -5,7 +5,7 @@ interface CreepMemory {
     previousPos?: { x: number, y: number, roomName: string }; // Viimeisin sijainti heatmapia varten
 }
 
-// Muistirakenne heatmapia varten
+// Memory-järjestelmämäärittelyt
 interface Memory {
     creeps: { [name: string]: CreepMemory };
     heatmap?: {
@@ -24,6 +24,7 @@ interface Memory {
         roadBuildInterval: number;  // Kuinka usein rakennetaan teitä (ticks)
         visualize: boolean;         // Näytetäänkö visualisointi
     };
+    _systemsInitialized?: boolean;  // Onko järjestelmät alustettu tässä pelisessiossa
 }
 
 // Declare the global lodash variable for use in modules

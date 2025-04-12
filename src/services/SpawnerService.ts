@@ -1,4 +1,5 @@
 import { CreepRole } from "../utils/enums";
+import { CreepDefinitions } from "../utils/CreepDefinitions";
 import { MemoryService } from "./MemoryService";
 
 export class SpawnerService {
@@ -18,18 +19,42 @@ export class SpawnerService {
     }
 
     private static getRoleToSpawn(): CreepRole | null {
-        switch (true) {
-            case MemoryService.getCreepsByRole(CreepRole.PAWN).length < 2:
-                return CreepRole.PAWN;
-            case MemoryService.getCreepsByRole(CreepRole.HARVESTER).length < 2:
-                return CreepRole.HARVESTER;
-            case MemoryService.getCreepsByRole(CreepRole.BUILDER).length < 2:
-                return CreepRole.BUILDER;
-            case MemoryService.getCreepsByRole(CreepRole.UPGRADER).length < 2:
-                return CreepRole.UPGRADER;
-            default:
-                return null; // No role to spawn
+        // Etsitään ensimmäinen spawneri joka ei ole spawnauksessa
+        const availableSpawn = Object.values(Game.spawns).find(spawn => !spawn.spawning);
+        if (!availableSpawn) {
+            return null;
         }
+
+        // Tarkistetaan jos PAWN-creep lähestyy elinkaarensa loppua
+        const criticalPawn = MemoryService.getCreepsByRole(CreepRole.PAWN)
+            .find(creep => creep.ticksToLive !== undefined && creep.ticksToLive < 50);
+
+        if (criticalPawn && this.canSpawnCreep(availableSpawn, CreepRole.PAWN)) {
+            return CreepRole.PAWN;
+        }
+
+        // Tarkistetaan onko meillä tarpeeksi creepejä jokaista roolia varten
+        // Käytetään Memory-asetuksia määrien hallintaan
+        const currentCounts = MemoryService.countCreepsByRole();
+
+        // Tarkista jokainen rooli järjestyksessä
+        const rolesToCheck = [
+            CreepRole.PAWN,
+            CreepRole.HARVESTER,
+            CreepRole.BUILDER,
+            CreepRole.UPGRADER
+        ];
+
+        for (const role of rolesToCheck) {
+            const currentCount = currentCounts[role] || 0;
+            const targetCount = MemoryService.getCreepCountTarget(role);
+
+            if (currentCount < targetCount && this.canSpawnCreep(availableSpawn, role)) {
+                return role;
+            }
+        }
+
+        return null; // Ei roolia tai energiaa ei riitä mihinkään rooliin
     }
 
     private static spawnCreep(spawn: StructureSpawn, role: CreepRole): ScreepsReturnCode {
@@ -42,33 +67,33 @@ export class SpawnerService {
     }
 
     private static getBodyPartsForRole(role: CreepRole, energyAvailable: number): BodyPartConstant[] {
-        // Perustason creep (pawn) - käytetään kun energia on vähissä tai alussa
-        const basicBody: BodyPartConstant[] = [WORK, CARRY, MOVE];
-        // Jos energia ei riitä edes perustason creepiin, palautetaan se
-        if (energyAvailable < this.calculateBodyCost(basicBody)) {
-            return basicBody;
+        // Käytetään CreepDefinitions-luokkaa pohjaruumiinosien hakemiseen
+        const creepDefinitions = CreepDefinitions.getInstance();
+
+        // Jos energia ei riitä minimivaatimuksiin, palauta minimivaatimukset (ei pitäisi tapahtua)
+        const minimumBody = creepDefinitions.getMinimumBodyForRole(role);
+        if (energyAvailable < this.calculateBodyCost(minimumBody)) {
+            return minimumBody;
         }
 
-        // Jos energia riittää kehittyneempiin creepeihin, määritellään ne roolin mukaan
-        switch (role) {
-            case CreepRole.PAWN:
-                return this.getScalableBody([WORK, CARRY, MOVE], energyAvailable);
+        // Käytetään pohjaruumiinosia skaalattavuuteen
+        const baseBody = creepDefinitions.getBaseBodyForRole(role);
+        return this.getScalableBody(baseBody, energyAvailable);
+    }
 
-            case CreepRole.HARVESTER:
-                // Harvesterilla enemmän WORK-osia resurssien tehokkaaseen keräämiseen
-                return this.getScalableBody([WORK, WORK, CARRY, MOVE], energyAvailable);
+    private static canSpawnCreep(spawn: StructureSpawn, role: CreepRole): boolean {
+        // Tarkistetaan, että energiaa on vähintään roolin minimivaatimukseen
+        const minimumBody = this.getMinimumBodyForRole(role);
+        const minimumCost = this.calculateBodyCost(minimumBody);
 
-            case CreepRole.BUILDER:
-                // Builderilla tasapaino WORK ja CARRY -osien välillä
-                return this.getScalableBody([WORK, CARRY, CARRY, MOVE, MOVE], energyAvailable);
-
-            case CreepRole.UPGRADER:
-                // Upgraderilla tasapaino WORK ja CARRY -osien välillä
-                return this.getScalableBody([WORK, WORK, CARRY, MOVE], energyAvailable);
-
-            default:
-                return basicBody;
+        if (spawn.room.energyAvailable < minimumCost) {
+            return false;
         }
+
+        // Jos energiaa on tarpeeksi, tehdään vielä dryrun API:n kautta varmuuden vuoksi
+        const body = this.getBodyPartsForRole(role, spawn.room.energyAvailable);
+        const spawnResult = spawn.spawnCreep(body, "dryrun", { dryRun: true });
+        return spawnResult === OK;
     }
 
     private static calculateBodyCost(body: BodyPartConstant[]): number {
@@ -182,4 +207,13 @@ export class SpawnerService {
             default: return 0;
         }
     }
+
+    /**
+     * Palauttaa roolin minimiruumiinosat, joilla creep voi toimia
+     */
+    private static getMinimumBodyForRole(role: CreepRole): BodyPartConstant[] {
+        // Käytetään CreepDefinitions-luokkaa minimivaatimusten hakemiseen
+        return CreepDefinitions.getInstance().getMinimumBodyForRole(role);
+    }
+
 }

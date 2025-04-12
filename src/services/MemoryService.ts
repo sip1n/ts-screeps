@@ -1,4 +1,5 @@
 import { CreepRole } from "../utils/enums";
+import { CreepDefinitions } from "../utils/CreepDefinitions";
 
 export class MemoryService {
     /**
@@ -110,5 +111,66 @@ export class MemoryService {
         console.log(`CPU Used: ${Game.cpu.getUsed().toFixed(2)}/${Game.cpu.limit}`);
         console.log(`Bucket: ${Game.cpu.bucket}/10000`);
         console.log('========================');
+    }
+
+    // Memory polku creepien määräasetuksille
+    private static readonly CREEP_COUNTS_PATH = 'creepCounts';
+
+    /**
+     * Luo oletusarvoilla täytetyn creep count -objektin
+     * @private
+     * @returns Oletusarvoilla täytetty creep count objekti
+     */
+    private static createDefaultCreepCounts(): Record<CreepRole, number> {
+        const creepDefinitions = CreepDefinitions.getInstance();
+        const defaultCounts: Record<CreepRole, number> = {} as Record<CreepRole, number>;
+
+        // Alustetaan oletusarvot kaikille rooleille
+        creepDefinitions.getAllRoles().forEach(r => {
+            defaultCounts[r] = creepDefinitions.getDefaultCountForRole(r);
+        });
+
+        return defaultCounts;
+    }
+
+    /**
+     * Alusta creepien määräasetukset, jos niitä ei ole vielä määritelty
+     */
+    public static initCreepCounts(): void {
+        if (!this.has(this.CREEP_COUNTS_PATH)) {
+            // Alustetaan oletusarvot ja talletetaan ne muistiin
+            this.set(this.CREEP_COUNTS_PATH, this.createDefaultCreepCounts());
+            console.log('Initialized default creep counts in Memory');
+        }
+    }
+
+    /**
+     * Hae tietyn roolin creepien tavoitemäärä
+     * @param role Rooli, jonka tavoitemäärä halutaan hakea
+     * @returns Tavoitemäärä tai oletusarvo jos määrää ei ole asetettu
+     */
+    public static getCreepCountTarget(role: CreepRole): number {
+        const counts = this.get<Record<CreepRole, number>>(this.CREEP_COUNTS_PATH, this.createDefaultCreepCounts());
+        return counts ? counts[role] || 0 : 0;
+    }
+
+    /**
+     * Aseta tietyn roolin creepien tavoitemäärä
+     * @param role Rooli, jonka tavoitemäärä halutaan asettaa
+     * @param count Uusi tavoitemäärä
+     */
+    public static setCreepCountTarget(role: CreepRole, count: number): void {
+        const counts = this.get<Record<CreepRole, number>>(this.CREEP_COUNTS_PATH, this.createDefaultCreepCounts()) || this.createDefaultCreepCounts();
+        counts[role] = count;
+        this.set(this.CREEP_COUNTS_PATH, counts);
+        console.log(`Set ${role} target count to ${count}`);
+    }
+
+    /**
+     * Hae kaikkien roolien creepien tavoitemäärät
+     * @returns Objekti, joka sisältää kaikkien roolien tavoitemäärät
+     */
+    public static getAllCreepCountTargets(): Record<CreepRole, number> {
+        return this.get<Record<CreepRole, number>>(this.CREEP_COUNTS_PATH, this.createDefaultCreepCounts()) || this.createDefaultCreepCounts();
     }
 }

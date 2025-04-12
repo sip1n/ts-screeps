@@ -7,6 +7,10 @@ export class PathTrackingService {
      * Alustaa path tracking järjestelmän jos sitä ei vielä ole
      */
     public static initialize(): void {
+        // Early return jos kaikki on jo alustettu
+        if (Memory.pathTracking && Memory.heatmap) return;
+
+        // Alustetaan pathTracking jos sitä ei vielä ole
         if (!Memory.pathTracking) {
             Memory.pathTracking = {
                 enabled: true,
@@ -18,6 +22,7 @@ export class PathTrackingService {
             };
         }
 
+        // Alustetaan heatmap jos sitä ei vielä ole
         if (!Memory.heatmap) {
             Memory.heatmap = {};
         }
@@ -27,11 +32,13 @@ export class PathTrackingService {
      * Päivittää heatmapin creepien liikkeiden perusteella
      */
     public static update(): void {
+        // Early return jos path tracking ei ole käytössä
         if (!Memory.pathTracking?.enabled) return;
 
         // Päivitetään vain tietyin väliajoin CPU:n säästämiseksi
-        if (!Memory.pathTracking || Game.time % (Memory.pathTracking.updateFrequency || 1) !== 0) return;
+        if (Game.time % (Memory.pathTracking.updateFrequency || 1) !== 0) return;
 
+        // Nyt voimme jatkaa varsinaista päivitystä
         for (const name in Game.creeps) {
             const creep = Game.creeps[name];
             this.trackCreepMovement(creep);
@@ -41,7 +48,7 @@ export class PathTrackingService {
         this.decayHeatmap();
 
         // Visualisoi heatmap jos käytössä
-        if (Memory.pathTracking?.visualize) {
+        if (Memory.pathTracking.visualize) {
             this.visualizeHeatmap();
         }
 
