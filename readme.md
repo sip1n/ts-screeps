@@ -1,10 +1,20 @@
-# Screeps Scripts
+# 🎮 Screeps Scripts
+
+<div align="center">
+  
+![Screeps](https://img.shields.io/badge/Screeps-FF5A00?style=for-the-badge&logo=screeps&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Rollup](https://img.shields.io/badge/Rollup-EC4A3F?style=for-the-badge&logo=rollup.js&logoColor=white)
+![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+
+</div>
 
 This project contains TypeScript-based scripts for the [Screeps](https://screeps.com/) game. Screeps is an MMO strategy game where you program your units and build automated systems in a persistent game world.
 
 This project is also an educational project to learn TypeScript by playing Screeps.
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 src/
@@ -17,7 +27,7 @@ build/
 └── main.js             # Compiled JavaScript code
 ```
 
-## Installation
+## 🚀 Installation
 
 1. Ensure you have [Node.js](https://nodejs.org/) and [TypeScript](https://www.typescriptlang.org/) installed.
 2. Install dependencies:
@@ -29,65 +39,63 @@ build/
    npm run build
    ```
 
-## Usage
+## 📋 Usage
 
 1. The compiled code can be found in the `build/main.js` file.
 2. The `build` folder contains the bundled output created by Rollup, which is optimized for Screeps to understand the script.
 3. Upload the code to the Screeps server using the Screeps CLI or any preferred tool.
 
-## Script Features
+## ⚙️ Script Features
 
-### Memory Reset Feature
+### 🧠 Memory System
 
-Järjestelmässä on toiminto, jolla voit tyhjentää koko muistin ja pakottaa muistinalustuksen, kun haluat "clean slate" -tilanteen päivittäessäsi koodia.
-
-#### Konsolikomento muistin resetointiin:
+The system handles memory management for your colony. When you need to reset memory or reinitialize the system after code updates, you can use:
 
 ```javascript
-// Vaatii vahvistuksen vahingossa tapahtuvien resetointien estämiseksi
-MemoryService.resetMemory(true);
+// Set this to false in the console to force reinitialization on the next tick
+Memory._systemsInitialized = false;
 ```
 
-Tämä komento:
-- Tyhjentää kaikki avaimet Memory-objektista
-- Asettaa Memory._systemsInitialized = false, jotta järjestelmän alustuslogiikka ajetaan uudelleen
-- Aloittaa puhtaalta pöydältä kaikilla oletusasetuksilla
+This action:
+- Forces the system to run initialization logic again on the next game tick
+- Preserves your existing memory but ensures new configuration is properly applied
+- Recognizes and initializes any newly added creep roles or other features
 
-### Path Tracking & Heatmap System
+### 🛣️ Path Tracking & Heatmap System
 
-Path tracking järjestelmä seuraa creepien liikkeitä ja luo automaattisesti teitä (roads) paikkoihin, joissa creepejä liikkuu paljon. Järjestelmä:
+The path tracking system follows creep movements and automatically creates roads in places where creeps move frequently. The system:
 
-1. Seuraa jokaisen creepin liikkumista ja tallentaa liikehdinnän heatmapiin
-2. Lämpökartta "jäähtyy" ajan myötä, jotta vanhat reitit poistuvat järjestelmästä
-3. Visualisoi heatmapin room.visual-API:n avulla
-4. Rakentaa automaattisesti teitä paikkoihin, joissa on paljon liikennettä
+1. Tracks the movement of each creep and stores the movement in a heatmap
+2. The heatmap "cools down" over time, so old routes disappear from the system
+3. Visualizes the heatmap using the room.visual API
+4. Automatically builds roads in places with high traffic
 
-#### Konsolikomennot Heatmap-järjestelmän hallintaan:
+#### Console Commands for Managing the Heatmap System:
 
 ```javascript
-// Ota käyttöön tai poista käytöstä järjestelmä
+// Enable or disable the system
 PathTrackingService.setEnabled(true/false);
 
-// Ota käyttöön tai poista visualisointi
+// Enable or disable visualization
 PathTrackingService.setVisualization(true/false);
 
-// Säädä kynnysarvoa, jonka jälkeen teitä rakennetaan
-// Oletusarvo on 100, eli teitä rakennetaan kun creepejä on kulkenut 
-// paikan läpi vähintään 100 kertaa
+// Adjust the threshold after which roads are built
+// Default value is 100, meaning roads are built when creeps have passed
+// through a location at least 100 times
 PathTrackingService.setRoadBuildThreshold(150);
 
-// Tyhjennä heatmap yhden huoneen osalta
+// Clear the heatmap for a single room
 PathTrackingService.clearHeatmap('W8N3');
 
-// Tyhjennä kaikki heatmap-data
+// Clear all heatmap data
 PathTrackingService.clearHeatmap();
 
-// Tarkastele huoneen heatmapia
+// View a room's heatmap
 const heatmapData = PathTrackingService.getHeatmapForRoom('W8N3');
 console.log(JSON.stringify(heatmapData));
 ```
 
-## Development
+## 💻 Development
 
 - Use [ESLint](https://eslint.org/) to ensure code quality:
   ```bash
@@ -95,9 +103,9 @@ console.log(JSON.stringify(heatmapData));
   ```
 - Use [Rollup](https://rollupjs.org/) for bundling and optimizing the code.
 
-## Roadmap 
+## 🗺️ Roadmap 
 
-## Phase 1: Core Functionality
+## Phase 1: Core Functionality ✅
 
 1. **Basic Creep Roles**
    - Implement essential creep roles: Harvester, Builder, Upgrader.
@@ -111,7 +119,7 @@ console.log(JSON.stringify(heatmapData));
    - Optimize energy harvesting and distribution.
    - Implement storage management for surplus energy.
 
-## Phase 2: Advanced Features
+## Phase 2: Advanced Features 🔄
 
 1. **Defense Mechanisms**
    - Add logic for tower defense and creep-based defense.
@@ -125,7 +133,7 @@ console.log(JSON.stringify(heatmapData));
    - Create a system to dynamically assign roles to creeps based on real-time needs.
    - Implement a priority queue for tasks.
 
-## Phase 3: Optimization
+## Phase 3: Optimization 🔜
 
 1. **Pathfinding Improvements**
    - Use Screeps' PathFinder API to optimize creep movement.
@@ -139,7 +147,7 @@ console.log(JSON.stringify(heatmapData));
    - Implement tools to monitor CPU usage and memory consumption.
    - Optimize scripts to stay within Screeps' CPU limits.
 
-## Phase 4: Endgame Automation
+## Phase 4: Endgame Automation 🔜
 
 1. **Market Integration**
    - Automate resource trading on the Screeps market.
@@ -153,25 +161,19 @@ console.log(JSON.stringify(heatmapData));
    - Implement logic for coordinating multiple rooms and colonies.
    - Share resources and tasks between rooms for maximum efficiency.
 
-## Phase 5: Continuous Improvement
+## Phase 5: Continuous Improvement 🔜
 
 1. **AI Enhancements**
    - Use machine learning or advanced algorithms to improve decision-making.
    - Experiment with adaptive strategies based on game state.
 
-2. **Community Contributions**
-   - Open the project for contributions from the Screeps community.
-   - Document the codebase thoroughly to make it accessible to others.
+2. **Testing and Debugging**
 
-3. **Testing and Debugging**
-   - Write unit tests for critical functions.
-   - Use Screeps' simulation mode to test new features before deploying.
 
 ---
 
-By following this roadmap, you can systematically build a fully automated and efficient Screeps script. Adjust the steps as needed based on your progress and goals.
 
-## License
+## 📝 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 

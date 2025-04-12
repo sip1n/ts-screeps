@@ -135,12 +135,38 @@ export class MemoryService {
 
     /**
      * Alusta creepien määräasetukset, jos niitä ei ole vielä määritelty
+     * Päivittää myös olemassa olevat asetukset jos uusia rooleja on lisätty
      */
     public static initCreepCounts(): void {
+        const creepDefinitions = CreepDefinitions.getInstance();
+        const allRoles = creepDefinitions.getAllRoles();
+
+        // Jos muistissa ei ole vielä creep-määrityksiä, alustetaan ne
         if (!this.has(this.CREEP_COUNTS_PATH)) {
             // Alustetaan oletusarvot ja talletetaan ne muistiin
             this.set(this.CREEP_COUNTS_PATH, this.createDefaultCreepCounts());
             console.log('Initialized default creep counts in Memory');
+            return;
+        }
+
+        // Tarkistetaan onko muistissa kaikki roolit ja päivitetään puuttuvat
+        const existingCounts = this.get<Record<CreepRole, number>>(this.CREEP_COUNTS_PATH);
+        let updated = false;
+
+        allRoles.forEach(role => {
+            if (!existingCounts || !(role in existingCounts)) {
+                // Lisätään puuttuva rooli oletusarvolla
+                const defaultCount = creepDefinitions.getDefaultCountForRole(role);
+                _.set(existingCounts, role, defaultCount);
+                updated = true;
+                console.log(`Added new role ${role} to memory with default count ${defaultCount}`);
+            }
+        });
+
+        // Talletetaan päivitetyt määrät, jos muutoksia tehtiin
+        if (updated) {
+            this.set(this.CREEP_COUNTS_PATH, existingCounts);
+            console.log('Updated creep counts in Memory with new roles');
         }
     }
 
@@ -172,30 +198,5 @@ export class MemoryService {
      */
     public static getAllCreepCountTargets(): Record<CreepRole, number> {
         return this.get<Record<CreepRole, number>>(this.CREEP_COUNTS_PATH, this.createDefaultCreepCounts()) || this.createDefaultCreepCounts();
-    }
-
-    /**
-     * Resets the entire Memory and forces reinitialization on the next tick
-     * Can be called from console with: `MemoryService.resetMemory()`
-     * @param confirm Set to true to confirm reset to prevent accidental calls
-     * @returns Message indicating success or requirement for confirmation
-     */
-    public static resetMemory(confirm: boolean = false): string {
-        if (!confirm) {
-            return "Please call with confirm=true to reset memory: MemoryService.resetMemory(true)";
-        }
-
-        // Reset everything to defaults
-        for (const key in Memory) {
-            if (Object.prototype.hasOwnProperty.call(Memory, key)) {
-                delete Memory[key as keyof Memory];
-            }
-        }
-
-        // Force reinitialization
-        Memory._systemsInitialized = false;
-
-        console.log("Memory has been reset! Systems will be reinitialized on next tick.");
-        return "Memory reset complete. Systems will be reinitialized on next tick.";
     }
 }

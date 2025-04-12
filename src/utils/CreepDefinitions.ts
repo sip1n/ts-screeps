@@ -89,7 +89,7 @@ export class CreepDefinitions {
             description: "Yleismies jantunen, joka korjaa rakenteita ja ylläpitää koloniaa",
             minimumBody: [WORK, CARRY, CARRY, MOVE, MOVE],
             baseBody: [WORK, CARRY, CARRY, MOVE, MOVE],
-            defaultCount: 1
+            defaultCount: 2
         });
 
         // lisää muita rooleja tarvittaessa
