@@ -37,6 +37,40 @@ build/
 
 ## Script Features
 
+### Path Tracking & Heatmap System
+
+Path tracking järjestelmä seuraa creepien liikkeitä ja luo automaattisesti teitä (roads) paikkoihin, joissa creepejä liikkuu paljon. Järjestelmä:
+
+1. Seuraa jokaisen creepin liikkumista ja tallentaa liikehdinnän heatmapiin
+2. Lämpökartta "jäähtyy" ajan myötä, jotta vanhat reitit poistuvat järjestelmästä
+3. Visualisoi heatmapin room.visual-API:n avulla
+4. Rakentaa automaattisesti teitä paikkoihin, joissa on paljon liikennettä
+
+#### Konsolikomennot Heatmap-järjestelmän hallintaan:
+
+```javascript
+// Ota käyttöön tai poista käytöstä järjestelmä
+PathTrackingService.setEnabled(true/false);
+
+// Ota käyttöön tai poista visualisointi
+PathTrackingService.setVisualization(true/false);
+
+// Säädä kynnysarvoa, jonka jälkeen teitä rakennetaan
+// Oletusarvo on 100, eli teitä rakennetaan kun creepejä on kulkenut 
+// paikan läpi vähintään 100 kertaa
+PathTrackingService.setRoadBuildThreshold(150);
+
+// Tyhjennä heatmap yhden huoneen osalta
+PathTrackingService.clearHeatmap('W8N3');
+
+// Tyhjennä kaikki heatmap-data
+PathTrackingService.clearHeatmap();
+
+// Tarkastele huoneen heatmapia
+const heatmapData = PathTrackingService.getHeatmapForRoom('W8N3');
+console.log(JSON.stringify(heatmapData));
+```
+
 ## Development
 
 - Use [ESLint](https://eslint.org/) to ensure code quality:

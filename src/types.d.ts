@@ -2,6 +2,28 @@
 interface CreepMemory {
     role: string;
     working?: boolean; // Optional boolean to track if the creep is currently working
+    previousPos?: { x: number, y: number, roomName: string }; // Viimeisin sijainti heatmapia varten
+}
+
+// Muistirakenne heatmapia varten
+interface Memory {
+    creeps: { [name: string]: CreepMemory };
+    heatmap?: {
+        [roomName: string]: {
+            [x: number]: {
+                [y: number]: number // Arvo kuvaa kuinka usein sijainnissa on käyty
+            }
+        }
+    };
+    pathTracking?: {
+        enabled: boolean;           // Onko järjestelmä käytössä
+        updateFrequency: number;    // Kuinka usein päivitetään (ticks)
+        decayRate: number;          // Kuinka nopeasti vanhemmat reitit "jäähtyvät"
+        buildRoadThreshold: number; // Kuinka korkea lämpöarvo vaaditaan tien rakentamiseen
+        lastRoadBuildTime?: number; // Milloin viimeksi rakennettu tie
+        roadBuildInterval: number;  // Kuinka usein rakennetaan teitä (ticks)
+        visualize: boolean;         // Näytetäänkö visualisointi
+    };
 }
 
 // Declare the global lodash variable for use in modules

@@ -4,6 +4,59 @@ export class CreepBase {
 
     constructor(creep: Creep) {
         this.creep = creep;
+        // Alustetaan working-tila, jos sitä ei ole vielä määritelty
+        if (this.creep.memory.working === undefined) {
+            this.creep.memory.working = false;
+        }
+    }
+
+    /**
+     * Aloittaa energian keräämisvaiheen
+     */
+    public startHarvesting(): void {
+        this.creep.memory.working = false;
+        this.harvestEnergy();
+    }
+
+    /**
+     * Aloittaa työskentelyn (energian käyttämisen)
+     */
+    public startWorking(): void {
+        this.creep.memory.working = true;
+    }
+
+    /**
+     * Tarkistaa työskenteleekö creep (eli käyttääkö se energiaansa)
+     */
+    public isWorking(): boolean {
+        return Boolean(this.creep.memory.working);
+    }
+
+    /**
+     * Päivittää creepin tilan automaattisesti:
+     * - Jos työskentelee ja on tyhjä, aloittaa keräämisen
+     * - Jos kerää ja on täynnä, aloittaa työskentelyn
+     * @returns true jos tila vaihtui, false jos ei
+     */
+    public updateWorkingState(): boolean {
+        if (this.isWorking() && this.isEmpty()) {
+            this.startHarvesting();
+            return true;
+        } else if (!this.isWorking() && this.isFull()) {
+            this.startWorking();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Kerää energiaa lähimmästä lähteestä
+     */
+    public harvestEnergy(): void {
+        const source = this.getClosestSource();
+        if (source) {
+            this.harvestSource(source);
+        }
     }
 
     public getCreepId(): string {
