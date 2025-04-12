@@ -185,9 +185,6 @@ export class MemoryService {
             return "Please call with confirm=true to reset memory: MemoryService.resetMemory(true)";
         }
 
-        // Save only some key parts like username for authentication
-        const savedParts: Partial<Memory> = {};
-
         // Reset everything to defaults
         for (const key in Memory) {
             if (Object.prototype.hasOwnProperty.call(Memory, key)) {
