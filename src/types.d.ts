@@ -25,6 +25,13 @@ interface Memory {
         lastRoadBuildTime?: number; // Milloin viimeksi rakennettu tie
         roadBuildInterval: number;  // Kuinka usein rakennetaan teitä (ticks)
         visualize: boolean;         // Näytetäänkö visualisointi
+        useConnectedRoads: boolean; // Rakennetaanko yhtenäisiä tieverkostoja
+    };
+    pathCache?: {
+        [key: string]: {
+            path: RoomPosition[];
+            lastUsed: number;
+        }
     };
     _systemsInitialized?: boolean;  // Onko järjestelmät alustettu tässä pelisessiossa
 }
